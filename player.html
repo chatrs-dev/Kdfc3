@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
+        
+        /* CARD CSS */
+        .player-card { 
+            background: white; 
+            border-radius: 15px; 
+            padding: 30px 20px; 
+            position: relative; 
+            text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            transition: transform 0.3s; 
+        }
+        .player-card:hover { transform: translateY(-5px); }
+
+        /* Image Area */
+        .img-container { position: relative; width: 120px; height: 120px; margin: 0 auto 15px auto; }
+        .profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid #f39c12; padding: 2px; background: white; }
+        .status-dot { position: absolute; bottom: 8px; right: 8px; background-color: #1877f2; color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; border: 2px solid white; }
+
+        /* Text Data */
+        .player-name { color: #1877f2; font-weight: 800; font-size: 22px; margin: 5px 0; }
+        
+        /* New Team Name Style */
+        .team-name { color: #e74c3c; font-weight: 700; font-size: 16px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .info-text { color: #444; font-size: 14px; margin: 4px 0; font-weight: 500; }
+        .uid-text { font-weight: bold; color: #555; }
+        .device-text { color: #000; font-weight: 700; }
+
+        /* Social Link */
+        .social-link { display: inline-block; margin-top: 20px; color: #1877f2; font-size: 28px; text-decoration: none; transition: 0.2s; }
+        .social-link:hover { transform: scale(1.1); color: #0d5bb3; }
+    </style>
+</head>
+<body>
+
+    <h1 style="text-align:center; color:#1877f2;">Player Info</h1>
+    
+    <div id="grid-container" class="grid-container">
+        <p style="text-align:center; width:100%;">Loading...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- PASTE THE SAME FIREBASE CONFIG HERE ---
+        const firebaseConfig = {
+  apiKey: "AIzaSyBSu7jRPwFyQwr4lW0wnp6P1JQZik78m6Y",
+  authDomain: "kuzur1.firebaseapp.com",
+  databaseURL: "https://kuzur1-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "kuzur1",
+  storageBucket: "kuzur1.firebasestorage.app",
+  messagingSenderId: "469095057640",
+  appId: "1:469095057640:web:1abeec5f3864156aeb215d"
+};
+        // ------------------------------------------
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const playersRef = ref(db, 'players');
+
+        onValue(playersRef, (snapshot) => {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = "";
+
+            if (!snapshot.exists()) {
+                container.innerHTML = "<p style='text-align:center;'>No players found.</p>";
+                return;
+            }
+
+            const data = snapshot.val();
+            const playersArray = [];
+            for (let id in data) {
+                playersArray.push(data[id]);
+            }
+
+            // Sort: Newest First
+            playersArray.sort((a, b) => b.createdAt - a.createdAt);
+
+            playersArray.forEach((player) => {
+                const photoURL = player.photo ? player.photo : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                
+                const cardHTML = `
+                    <div class="player-card">
+                        <!-- Removed Badges here -->
+                        
+                        <div class="img-container">
+                            <img src="${photoURL}" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                       
+                        </div>
+
+                        <div class="player-name">${player.name}</div>
+                        <!-- Added Team Name -->
+                        <div class="team-name">${player.team}</div>
+
+                        <div class="info-text uid-text">UID: ${player.uid}</div>
+                        <div class="info-text">Mobile: ${player.mobile}</div>
+                        <div class="info-text device-text">Device: ${player.device}</div>
+                        
+                        <!-- Removed Stats Row here -->
+
+                        <a href="${player.fb_link}" target="_blank" class="social-link">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+        });
+    </script>
+</body>
+</html>
