@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>  Register now </title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #2c3e50; padding: 40px; display: flex; justify-content: center; }
+        .admin-box { background: white; padding: 30px; border-radius: 10px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        h2 { text-align: center; color: #333; margin-top: 0; }
+        
+        input { width: 100%; padding: 12px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        label { font-size: 12px; font-weight: bold; color: #666; }
+        
+        button { width: 100%; padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        button:hover { background: #c0392b; }
+        
+        .status { text-align: center; margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-box">
+        <h2>Register now </h2>
+        <form id="adminForm">
+            <label>Full Name</label>
+            <input type="text" id="fullName" placeholder="e.g. Nicolas Jackson "  required>
+
+            <!-- NEW TEAM NAME INPUT -->
+            <label>Team Name</label>
+            <input type="text" id="teamName" placeholder="e.g. Kurigram Dynasty FC" required>
+            
+            <label>Mobile Number</label>
+            <input type="text" id="mobile" placeholder="+88017XXXXXX" required>
+            
+            <label>UID</label>
+            <input type="text" id="uid"  placeholder="e.g. ABCD-123-456-789" required>
+            
+            <label>Device Name</label>
+            <input type="text" id="device" placeholder="e.g. Realme C53" required>
+            
+            <label>Facebook Profile Link</label>
+            <input type="url" id="fbLink" placeholder="https://facebook.com/..." required>
+            
+            <label>Photo URL (Direct Link)</label>
+            <input type="url" id="photoLink" placeholder="https://..." required>
+            
+            <button type="submit" id="submitBtn">Register now</button>
+            <div class="status" id="statusMsg"></div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set, serverTimestamp } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- PASTE YOUR FIREBASE CONFIG HERE ---
+        const firebaseConfig = {
+  apiKey: "AIzaSyBSu7jRPwFyQwr4lW0wnp6P1JQZik78m6Y",
+  authDomain: "kuzur1.firebaseapp.com",
+  databaseURL: "https://kuzur1-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "kuzur1",
+  storageBucket: "kuzur1.firebasestorage.app",
+  messagingSenderId: "469095057640",
+  appId: "1:469095057640:web:1abeec5f3864156aeb215d"
+};
+        // ---------------------------------------
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.getElementById('adminForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const msg = document.getElementById('statusMsg');
+            
+            btn.disabled = true;
+            btn.textContent = "loding...";
+
+            const newPlayerRef = push(ref(db, 'players'));
+
+            set(newPlayerRef, {
+                name: document.getElementById('fullName').value,
+                team: document.getElementById('teamName').value, // Saving Team Name
+                mobile: document.getElementById('mobile').value,
+                uid: document.getElementById('uid').value,
+                device: document.getElementById('device').value,
+                fb_link: document.getElementById('fbLink').value,
+                photo: document.getElementById('photoLink').value,
+                createdAt: serverTimestamp()
+                // Removed: Rank, Days, and Stats generation
+            })
+            .then(() => {
+                msg.innerText = "Registration successful";
+                msg.style.color = "green";
+                document.getElementById('adminForm').reset();
+            })
+            .catch((error) => {
+                console.error(error);
+                msg.innerText = "Error: " + error.message;
+                msg.style.color = "red";
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = "egistration successful ";
+            });
+        });
+    </script>
+</body>
+</html>
